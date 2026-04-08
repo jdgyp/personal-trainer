@@ -1,0 +1,1012 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Personal Trainer</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0f0f13;
+      --surface: #1a1a22;
+      --surface2: #22222e;
+      --border: #2e2e3e;
+      --accent: #6c63ff;
+      --accent2: #ff6584;
+      --green: #22d3a3;
+      --orange: #f97316;
+      --text: #f0f0f5;
+      --muted: #888;
+      --radius: 16px;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      max-width: 480px;
+      margin: 0 auto;
+      padding-bottom: 90px;
+    }
+
+    /* Header */
+    header {
+      padding: 20px 20px 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .date-label { font-size: 13px; color: var(--muted); }
+    .greeting { font-size: 22px; font-weight: 700; margin-top: 2px; }
+
+    .streak-badge {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 6px 12px;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    /* Protein ring */
+    .section { padding: 20px 20px 0; }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+    }
+
+    .card-title {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--muted);
+      margin-bottom: 16px;
+    }
+
+    .protein-ring-wrap {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+    }
+
+    .ring-container { position: relative; width: 120px; height: 120px; flex-shrink: 0; }
+
+    .ring-svg { transform: rotate(-90deg); }
+
+    .ring-bg { fill: none; stroke: var(--surface2); stroke-width: 10; }
+    .ring-fill {
+      fill: none;
+      stroke-width: 10;
+      stroke-linecap: round;
+      transition: stroke-dashoffset 0.5s ease, stroke 0.3s;
+    }
+
+    .ring-label {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .ring-grams { font-size: 24px; font-weight: 800; line-height: 1; }
+    .ring-unit { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+    .protein-info { flex: 1; }
+    .protein-goal-label { font-size: 13px; color: var(--muted); margin-bottom: 8px; }
+    .protein-goal-label span { color: var(--text); font-weight: 700; }
+
+    .macro-bars { display: flex; flex-direction: column; gap: 6px; margin-top: 12px; }
+    .macro-row { display: flex; align-items: center; gap: 8px; font-size: 12px; }
+    .macro-name { width: 50px; color: var(--muted); }
+    .macro-bar-bg { flex: 1; background: var(--surface2); border-radius: 4px; height: 6px; overflow: hidden; }
+    .macro-bar-fill { height: 100%; border-radius: 4px; transition: width 0.4s; }
+    .macro-val { width: 36px; text-align: right; font-size: 11px; color: var(--muted); }
+
+    /* Log protein */
+    .log-row {
+      display: flex;
+      gap: 8px;
+      margin-top: 16px;
+      flex-wrap: wrap;
+    }
+
+    .quick-btn {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 6px 14px;
+      color: var(--text);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .quick-btn:hover { background: var(--accent); border-color: var(--accent); }
+
+    .custom-row {
+      display: flex;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .custom-input {
+      flex: 1;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 9px 12px;
+      color: var(--text);
+      font-size: 14px;
+      outline: none;
+      font-family: inherit;
+    }
+    .custom-input:focus { border-color: var(--accent); }
+    .custom-input::placeholder { color: #555; }
+
+    .log-btn {
+      background: var(--accent);
+      border: none;
+      border-radius: 10px;
+      padding: 9px 18px;
+      color: white;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .log-btn:hover { opacity: 0.85; }
+
+    /* Log entries */
+    .log-entries { margin-top: 12px; display: flex; flex-direction: column; gap: 6px; }
+
+    .log-entry {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--surface2);
+      border-radius: 10px;
+      padding: 8px 12px;
+      font-size: 13px;
+    }
+
+    .entry-name { color: var(--muted); }
+    .entry-grams { font-weight: 700; color: var(--green); }
+
+    .entry-del {
+      background: none;
+      border: none;
+      color: #444;
+      cursor: pointer;
+      font-size: 16px;
+      padding: 0 2px;
+    }
+    .entry-del:hover { color: var(--accent2); }
+
+    /* Goal hit banner */
+    .goal-banner {
+      background: linear-gradient(135deg, #22d3a3, #6c63ff);
+      border-radius: 12px;
+      padding: 12px 16px;
+      margin-top: 12px;
+      text-align: center;
+      font-weight: 700;
+      font-size: 15px;
+      display: none;
+    }
+
+    /* Workout */
+    .workout-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 4px;
+    }
+
+    .workout-type {
+      font-size: 18px;
+      font-weight: 800;
+    }
+
+    .rest-day {
+      text-align: center;
+      padding: 30px 0;
+      color: var(--muted);
+    }
+    .rest-day .rest-icon { font-size: 40px; margin-bottom: 8px; }
+    .rest-day p { font-size: 15px; }
+
+    .exercise-list { display: flex; flex-direction: column; gap: 10px; margin-top: 14px; }
+
+    .exercise-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--surface2);
+      border-radius: 12px;
+      padding: 12px 14px;
+      cursor: pointer;
+      transition: background 0.15s;
+      border: 1px solid transparent;
+    }
+
+    .exercise-item.done {
+      border-color: var(--green);
+      opacity: 0.6;
+    }
+
+    .ex-check {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      border: 2px solid var(--border);
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+
+    .exercise-item.done .ex-check {
+      background: var(--green);
+      border-color: var(--green);
+    }
+
+    .ex-tick { display: none; font-size: 12px; }
+    .exercise-item.done .ex-tick { display: block; }
+
+    .ex-info { flex: 1; }
+    .ex-name { font-size: 14px; font-weight: 600; }
+    .ex-detail { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .ex-knee { font-size: 10px; color: var(--orange); margin-top: 2px; }
+
+    .workout-progress {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 14px;
+    }
+    .wp-bar-bg { flex: 1; background: var(--surface2); border-radius: 4px; height: 6px; overflow: hidden; }
+    .wp-bar-fill { height: 100%; background: var(--green); border-radius: 4px; transition: width 0.4s; }
+    .wp-label { font-size: 12px; color: var(--muted); white-space: nowrap; }
+
+    /* Settings */
+    .settings-section { display: none; }
+    .settings-section.active { display: block; }
+
+    .setting-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .setting-row:last-child { border-bottom: none; }
+
+    .setting-label { font-size: 14px; }
+    .setting-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+    .setting-input {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 6px 10px;
+      color: var(--text);
+      font-size: 14px;
+      outline: none;
+      width: 80px;
+      text-align: center;
+      font-family: inherit;
+    }
+    .setting-input:focus { border-color: var(--accent); }
+
+    .days-selector {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+    }
+
+    .day-toggle {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      border: 2px solid var(--border);
+      background: var(--surface2);
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s;
+    }
+    .day-toggle.on {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: white;
+    }
+
+    .save-btn {
+      width: 100%;
+      background: var(--accent);
+      border: none;
+      border-radius: 12px;
+      padding: 14px;
+      color: white;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      margin-top: 20px;
+    }
+    .save-btn:hover { opacity: 0.85; }
+
+    /* Bottom nav */
+    nav {
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
+      max-width: 480px;
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      display: flex;
+      padding: 8px 0 20px;
+    }
+
+    .nav-item {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      padding: 8px;
+      cursor: pointer;
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border: none;
+      background: none;
+      transition: color 0.15s;
+    }
+    .nav-item.active { color: var(--accent); }
+    .nav-icon { font-size: 20px; }
+
+    /* Views */
+    .view { display: none; }
+    .view.active { display: block; }
+
+    .page-title {
+      font-size: 20px;
+      font-weight: 800;
+      padding: 20px 20px 0;
+      margin-bottom: 4px;
+    }
+  </style>
+</head>
+<body>
+
+<!-- TODAY VIEW -->
+<div class="view active" id="view-today">
+  <header>
+    <div>
+      <div class="date-label" id="todayLabel"></div>
+      <div class="greeting" id="greeting">Good morning 👋</div>
+    </div>
+    <div class="streak-badge">
+      🔥 <span id="streakCount">0</span> day streak
+    </div>
+  </header>
+
+  <!-- Protein tracker -->
+  <div class="section" style="margin-top:20px;">
+    <div class="card">
+      <div class="card-title">Protein tracker</div>
+      <div class="protein-ring-wrap">
+        <div class="ring-container">
+          <svg class="ring-svg" width="120" height="120" viewBox="0 0 120 120">
+            <circle class="ring-bg" cx="60" cy="60" r="52" />
+            <circle class="ring-fill" id="ringFill" cx="60" cy="60" r="52"
+              stroke-dasharray="326.7"
+              stroke-dashoffset="326.7"
+              stroke="var(--green)" />
+          </svg>
+          <div class="ring-label">
+            <div class="ring-grams" id="ringGrams">0</div>
+            <div class="ring-unit">/ <span id="ringGoal">150</span>g</div>
+          </div>
+        </div>
+        <div class="protein-info">
+          <div class="protein-goal-label">Daily goal: <span id="goalDisplay">150g</span></div>
+          <div class="macro-bars" id="macroBars" style="display:none;">
+            <div class="macro-row">
+              <span class="macro-name">Carbs</span>
+              <div class="macro-bar-bg"><div class="macro-bar-fill" id="carbBar" style="background:#6c63ff;width:0%"></div></div>
+              <span class="macro-val" id="carbVal">0g</span>
+            </div>
+            <div class="macro-row">
+              <span class="macro-name">Fat</span>
+              <div class="macro-bar-bg"><div class="macro-bar-fill" id="fatBar" style="background:#ff6584;width:0%"></div></div>
+              <span class="macro-val" id="fatVal">0g</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="log-row" id="quickBtns"></div>
+
+      <div class="custom-row">
+        <input class="custom-input" id="customName" placeholder="Food / meal name" />
+        <input class="custom-input" id="customGrams" placeholder="Protein g" type="number" min="0" style="width:90px;flex:none;" />
+        <button class="log-btn" id="logBtn">Log</button>
+      </div>
+
+      <div class="goal-banner" id="goalBanner">🎯 Protein goal smashed! Keep it up.</div>
+
+      <div class="log-entries" id="logEntries"></div>
+    </div>
+  </div>
+
+  <!-- Today's workout -->
+  <div class="section" style="margin-top:16px;">
+    <div class="card">
+      <div class="card-title">Today's workout</div>
+      <div id="workoutContent"></div>
+    </div>
+  </div>
+</div>
+
+<!-- HISTORY VIEW (simple) -->
+<div class="view" id="view-history">
+  <div class="page-title">Progress</div>
+  <div class="section" style="margin-top:12px;">
+    <div class="card" id="historyCard">
+      <div class="card-title">Protein — last 7 days</div>
+      <div id="historyContent"></div>
+    </div>
+  </div>
+</div>
+
+<!-- SETTINGS VIEW -->
+<div class="view" id="view-settings">
+  <div class="page-title">Settings</div>
+  <div class="section" style="margin-top:12px;">
+    <div class="card">
+      <div class="card-title">Goals</div>
+      <div class="setting-row">
+        <div>
+          <div class="setting-label">Daily protein goal</div>
+          <div class="setting-sub">Aim for ~1g per lb of bodyweight</div>
+        </div>
+        <input class="setting-input" id="setProtein" type="number" min="50" max="400" />
+      </div>
+      <div class="setting-row">
+        <div>
+          <div class="setting-label">Track macros too?</div>
+          <div class="setting-sub">Carbs & fat goals (optional)</div>
+        </div>
+        <input class="setting-input" id="setCarbs" type="number" placeholder="Carbs g" min="0" />
+      </div>
+      <div class="setting-row">
+        <div></div>
+        <input class="setting-input" id="setFat" type="number" placeholder="Fat g" min="0" />
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:16px;">
+      <div class="card-title">Workout days</div>
+      <div class="setting-row" style="border:none;padding-bottom:4px;">
+        <div>
+          <div class="setting-label">Which days do you train?</div>
+          <div class="setting-sub">Tap to toggle</div>
+        </div>
+      </div>
+      <div class="days-selector" id="daysSelector"></div>
+    </div>
+
+    <div class="card" style="margin-top:16px;">
+      <div class="card-title">Quick log shortcuts</div>
+      <div class="setting-row">
+        <div>
+          <div class="setting-label">Shortcut 1</div>
+          <div class="setting-sub">Name + protein grams</div>
+        </div>
+        <div style="display:flex;gap:6px;">
+          <input class="setting-input" id="q1name" placeholder="Chicken" style="width:80px;" />
+          <input class="setting-input" id="q1g" placeholder="30g" type="number" style="width:60px;" />
+        </div>
+      </div>
+      <div class="setting-row">
+        <div><div class="setting-label">Shortcut 2</div></div>
+        <div style="display:flex;gap:6px;">
+          <input class="setting-input" id="q2name" placeholder="Shake" style="width:80px;" />
+          <input class="setting-input" id="q2g" placeholder="25g" type="number" style="width:60px;" />
+        </div>
+      </div>
+      <div class="setting-row">
+        <div><div class="setting-label">Shortcut 3</div></div>
+        <div style="display:flex;gap:6px;">
+          <input class="setting-input" id="q3name" placeholder="Eggs" style="width:80px;" />
+          <input class="setting-input" id="q3g" placeholder="18g" type="number" style="width:60px;" />
+        </div>
+      </div>
+    </div>
+
+    <button class="save-btn" id="saveSettings">Save settings</button>
+  </div>
+</div>
+
+<!-- BOTTOM NAV -->
+<nav>
+  <button class="nav-item active" data-view="today">
+    <span class="nav-icon">🏠</span>Today
+  </button>
+  <button class="nav-item" data-view="history">
+    <span class="nav-icon">📈</span>Progress
+  </button>
+  <button class="nav-item" data-view="settings">
+    <span class="nav-icon">⚙️</span>Settings
+  </button>
+</nav>
+
+<script>
+  // ── Data helpers ──────────────────────────────────────────────
+  const todayKey = () => new Date().toISOString().slice(0,10);
+
+  function load(k, fallback) {
+    try { return JSON.parse(localStorage.getItem(k)) ?? fallback; } catch { return fallback; }
+  }
+  function save(k, v) { localStorage.setItem(k, JSON.stringify(v)); }
+
+  // ── Settings ──────────────────────────────────────────────────
+  const DEFAULT_SETTINGS = {
+    protein: 150,
+    carbs: 0,
+    fat: 0,
+    workoutDays: [1,2,4,5], // Mon,Tue,Thu,Fri
+    quickLogs: [
+      { name: 'Chicken breast', g: 31 },
+      { name: 'Protein shake', g: 25 },
+      { name: '2 eggs', g: 13 },
+    ]
+  };
+
+  function getSettings() { return load('settings', DEFAULT_SETTINGS); }
+
+  // ── Workout programmes ─────────────────────────────────────────
+  // Rotates through sessions based on which workout number of the week/cycle it is
+  const PROGRAMS = {
+    1: [{ name: 'Full Body', sessions: [
+      { label: 'Full Body A', exercises: [
+        { name: 'Goblet Squat', detail: '3 × 10–12 reps', knee: true },
+        { name: 'Dumbbell Bench Press', detail: '3 × 10–12 reps' },
+        { name: 'Seated Cable Row', detail: '3 × 10–12 reps' },
+        { name: 'Dumbbell Shoulder Press', detail: '3 × 10 reps' },
+        { name: 'Romanian Deadlift', detail: '3 × 10 reps' },
+      ]}
+    ]}],
+    2: [{ name: 'Full Body', sessions: [
+      { label: 'Full Body A', exercises: [
+        { name: 'Goblet Squat', detail: '3 × 10 reps', knee: true },
+        { name: 'Dumbbell Bench Press', detail: '3 × 10 reps' },
+        { name: 'Lat Pulldown', detail: '3 × 10 reps' },
+        { name: 'Romanian Deadlift', detail: '3 × 10 reps' },
+        { name: 'Plank', detail: '3 × 30–45 sec' },
+      ]},
+      { label: 'Full Body B', exercises: [
+        { name: 'Leg Press', detail: '3 × 12 reps', knee: true },
+        { name: 'Incline Dumbbell Press', detail: '3 × 10 reps' },
+        { name: 'Dumbbell Row', detail: '3 × 10 each side' },
+        { name: 'Dumbbell Lateral Raise', detail: '3 × 12 reps' },
+        { name: 'Deadlift', detail: '3 × 6–8 reps' },
+      ]}
+    ]}],
+    3: [{ name: 'Full Body', sessions: [
+      { label: 'Full Body A', exercises: [
+        { name: 'Barbell Squat', detail: '4 × 6–8 reps', knee: true },
+        { name: 'Bench Press', detail: '4 × 6–8 reps' },
+        { name: 'Barbell Row', detail: '4 × 6–8 reps' },
+        { name: 'Romanian Deadlift', detail: '3 × 10 reps' },
+        { name: 'Overhead Press', detail: '3 × 8 reps' },
+      ]},
+      { label: 'Full Body B', exercises: [
+        { name: 'Deadlift', detail: '4 × 5 reps' },
+        { name: 'Incline Bench Press', detail: '3 × 10 reps' },
+        { name: 'Pull-up / Lat Pulldown', detail: '3 × 8–10 reps' },
+        { name: 'Leg Press', detail: '3 × 12 reps', knee: true },
+        { name: 'Dips', detail: '3 × 10 reps' },
+      ]}
+    ]}],
+    4: [{ name: 'Upper / Lower', sessions: [
+      { label: 'Upper A', exercises: [
+        { name: 'Bench Press', detail: '4 × 6–8 reps' },
+        { name: 'Barbell Row', detail: '4 × 6–8 reps' },
+        { name: 'Overhead Press', detail: '3 × 8 reps' },
+        { name: 'Lat Pulldown', detail: '3 × 10 reps' },
+        { name: 'Tricep Pushdown', detail: '3 × 12 reps' },
+      ]},
+      { label: 'Lower A', exercises: [
+        { name: 'Squat', detail: '4 × 6–8 reps', knee: true },
+        { name: 'Romanian Deadlift', detail: '4 × 8 reps' },
+        { name: 'Leg Press', detail: '3 × 12 reps', knee: true },
+        { name: 'Leg Curl', detail: '3 × 12 reps' },
+        { name: 'Calf Raise', detail: '4 × 15 reps' },
+      ]},
+      { label: 'Upper B', exercises: [
+        { name: 'Incline Dumbbell Press', detail: '4 × 10 reps' },
+        { name: 'Pull-up', detail: '4 × max reps' },
+        { name: 'Dumbbell Shoulder Press', detail: '3 × 10 reps' },
+        { name: 'Cable Row', detail: '3 × 12 reps' },
+        { name: 'Bicep Curl', detail: '3 × 12 reps' },
+      ]},
+      { label: 'Lower B', exercises: [
+        { name: 'Deadlift', detail: '4 × 5 reps' },
+        { name: 'Bulgarian Split Squat', detail: '3 × 10 each', knee: true },
+        { name: 'Leg Extension', detail: '3 × 15 reps', knee: true },
+        { name: 'Leg Curl', detail: '3 × 12 reps' },
+        { name: 'Calf Raise', detail: '4 × 15 reps' },
+      ]},
+    ]}],
+    5: [{ name: 'Push / Pull / Legs', sessions: [
+      { label: 'Push', exercises: [
+        { name: 'Bench Press', detail: '4 × 6–8 reps' },
+        { name: 'Incline Dumbbell Press', detail: '3 × 10 reps' },
+        { name: 'Overhead Press', detail: '3 × 8 reps' },
+        { name: 'Lateral Raise', detail: '3 × 15 reps' },
+        { name: 'Tricep Pushdown', detail: '3 × 12 reps' },
+      ]},
+      { label: 'Pull', exercises: [
+        { name: 'Deadlift', detail: '4 × 5 reps' },
+        { name: 'Pull-up', detail: '4 × max reps' },
+        { name: 'Barbell Row', detail: '3 × 8 reps' },
+        { name: 'Face Pull', detail: '3 × 15 reps' },
+        { name: 'Bicep Curl', detail: '3 × 12 reps' },
+      ]},
+      { label: 'Legs', exercises: [
+        { name: 'Squat', detail: '4 × 6–8 reps', knee: true },
+        { name: 'Romanian Deadlift', detail: '3 × 10 reps' },
+        { name: 'Leg Press', detail: '3 × 12 reps', knee: true },
+        { name: 'Leg Curl', detail: '3 × 12 reps' },
+        { name: 'Calf Raise', detail: '4 × 15 reps' },
+      ]},
+      { label: 'Upper', exercises: [
+        { name: 'Incline Bench Press', detail: '4 × 8 reps' },
+        { name: 'Cable Row', detail: '4 × 10 reps' },
+        { name: 'Dumbbell Shoulder Press', detail: '3 × 10 reps' },
+        { name: 'Lat Pulldown', detail: '3 × 10 reps' },
+        { name: 'Dips', detail: '3 × 10 reps' },
+      ]},
+      { label: 'Lower', exercises: [
+        { name: 'Front Squat', detail: '4 × 6 reps', knee: true },
+        { name: 'Deadlift', detail: '3 × 5 reps' },
+        { name: 'Walking Lunges', detail: '3 × 12 each', knee: true },
+        { name: 'Leg Curl', detail: '3 × 12 reps' },
+        { name: 'Calf Raise', detail: '4 × 15 reps' },
+      ]},
+    ]}],
+  };
+
+  function getTodaySession() {
+    const s = getSettings();
+    const workoutDays = s.workoutDays || [];
+    const todayDow = new Date().getDay(); // 0=Sun, 1=Mon...
+
+    if (!workoutDays.includes(todayDow)) return null;
+
+    const count = workoutDays.length;
+    const prog = PROGRAMS[Math.min(count, 5)][0];
+
+    // Which index in the week is today?
+    const dayIndex = workoutDays.indexOf(todayDow);
+    const session = prog.sessions[dayIndex % prog.sessions.length];
+    return { programName: prog.name, session };
+  }
+
+  // ── Today protein log ─────────────────────────────────────────
+  function getLog() { return load('log_' + todayKey(), []); }
+  function saveLog(l) { save('log_' + todayKey(), l); }
+
+  function totalProtein() { return getLog().reduce((s, e) => s + (e.p || 0), 0); }
+  function totalMacro(key) { return getLog().reduce((s, e) => s + (e[key] || 0), 0); }
+
+  function renderProtein() {
+    const s = getSettings();
+    const goal = s.protein || 150;
+    const total = totalProtein();
+    const pct = Math.min(total / goal, 1);
+    const circumference = 326.7;
+
+    document.getElementById('ringGrams').textContent = total;
+    document.getElementById('ringGoal').textContent = goal;
+    document.getElementById('goalDisplay').textContent = goal + 'g';
+
+    const fill = document.getElementById('ringFill');
+    fill.style.strokeDashoffset = circumference * (1 - pct);
+    fill.style.stroke = pct >= 1 ? '#22d3a3' : pct > 0.6 ? '#6c63ff' : '#f97316';
+
+    // Macros
+    const carbGoal = s.carbs || 0;
+    const fatGoal = s.fat || 0;
+    const macroBars = document.getElementById('macroBars');
+    if (carbGoal > 0 || fatGoal > 0) {
+      macroBars.style.display = 'flex';
+      const tc = totalMacro('c'), tf = totalMacro('f');
+      document.getElementById('carbBar').style.width = carbGoal ? Math.min(tc/carbGoal*100,100)+'%' : '0%';
+      document.getElementById('fatBar').style.width = fatGoal ? Math.min(tf/fatGoal*100,100)+'%' : '0%';
+      document.getElementById('carbVal').textContent = tc + 'g';
+      document.getElementById('fatVal').textContent = tf + 'g';
+    } else {
+      macroBars.style.display = 'none';
+    }
+
+    // Goal banner
+    document.getElementById('goalBanner').style.display = total >= goal ? 'block' : 'none';
+
+    // Streak
+    updateStreak(total >= goal);
+
+    // Log entries
+    const entries = document.getElementById('logEntries');
+    const log = getLog();
+    entries.innerHTML = '';
+    log.slice().reverse().forEach((entry, ri) => {
+      const idx = log.length - 1 - ri;
+      const row = document.createElement('div');
+      row.className = 'log-entry';
+      row.innerHTML = `
+        <span class="entry-name">${entry.name}</span>
+        <span class="entry-grams">+${entry.p}g protein</span>
+        <button class="entry-del" data-idx="${idx}">×</button>
+      `;
+      entries.appendChild(row);
+    });
+
+    entries.querySelectorAll('.entry-del').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const log = getLog();
+        log.splice(+btn.dataset.idx, 1);
+        saveLog(log);
+        renderProtein();
+      });
+    });
+  }
+
+  function updateStreak(hitToday) {
+    const streaks = load('streaks', {});
+    const tk = todayKey();
+    if (hitToday) streaks[tk] = true;
+    save('streaks', streaks);
+
+    let streak = 0;
+    const d = new Date();
+    while (true) {
+      const k = d.toISOString().slice(0,10);
+      if (streaks[k]) { streak++; d.setDate(d.getDate() - 1); }
+      else break;
+    }
+    document.getElementById('streakCount').textContent = streak;
+  }
+
+  function renderQuickBtns() {
+    const s = getSettings();
+    const container = document.getElementById('quickBtns');
+    container.innerHTML = '';
+    (s.quickLogs || []).forEach(q => {
+      if (!q.name || !q.g) return;
+      const btn = document.createElement('button');
+      btn.className = 'quick-btn';
+      btn.textContent = `${q.name} (+${q.g}g)`;
+      btn.addEventListener('click', () => {
+        const log = getLog();
+        log.push({ name: q.name, p: q.g });
+        saveLog(log);
+        renderProtein();
+      });
+      container.appendChild(btn);
+    });
+  }
+
+  // ── Workout render ─────────────────────────────────────────────
+  function renderWorkout() {
+    const container = document.getElementById('workoutContent');
+    const result = getTodaySession();
+
+    if (!result) {
+      container.innerHTML = `
+        <div class="rest-day">
+          <div class="rest-icon">😴</div>
+          <p>Rest day — recover well.</p>
+          <p style="margin-top:6px;font-size:12px;color:var(--muted);">Protein still counts on rest days!</p>
+        </div>`;
+      return;
+    }
+
+    const { session } = result;
+    const doneKey = 'workout_' + todayKey();
+    const done = load(doneKey, []);
+
+    const completedCount = session.exercises.filter((_, i) => done.includes(i)).length;
+    const pct = session.exercises.length ? completedCount / session.exercises.length * 100 : 0;
+
+    container.innerHTML = `
+      <div class="workout-header">
+        <div class="workout-type">${session.label}</div>
+      </div>
+      <div class="workout-progress">
+        <div class="wp-bar-bg"><div class="wp-bar-fill" style="width:${pct}%"></div></div>
+        <div class="wp-label">${completedCount}/${session.exercises.length}</div>
+      </div>
+      <div class="exercise-list" id="exList"></div>
+    `;
+
+    const list = document.getElementById('exList');
+    session.exercises.forEach((ex, i) => {
+      const isDone = done.includes(i);
+      const item = document.createElement('div');
+      item.className = 'exercise-item' + (isDone ? ' done' : '');
+      item.innerHTML = `
+        <div class="ex-check"><span class="ex-tick">✓</span></div>
+        <div class="ex-info">
+          <div class="ex-name">${ex.name}</div>
+          <div class="ex-detail">${ex.detail}</div>
+          ${ex.knee ? '<div class="ex-knee">⚠ Modify for knee if needed</div>' : ''}
+        </div>
+      `;
+      item.addEventListener('click', () => {
+        const d = load(doneKey, []);
+        if (d.includes(i)) d.splice(d.indexOf(i), 1);
+        else d.push(i);
+        save(doneKey, d);
+        renderWorkout();
+      });
+      list.appendChild(item);
+    });
+  }
+
+  // ── History ────────────────────────────────────────────────────
+  function renderHistory() {
+    const s = getSettings();
+    const goal = s.protein || 150;
+    const content = document.getElementById('historyContent');
+    content.innerHTML = '';
+
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      const k = d.toISOString().slice(0,10);
+      const log = load('log_' + k, []);
+      const total = log.reduce((s, e) => s + (e.p || 0), 0);
+      const pct = Math.min(total / goal * 100, 100);
+      const label = i === 0 ? 'Today' : d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' });
+      const hit = total >= goal;
+
+      const row = document.createElement('div');
+      row.style.cssText = 'margin-bottom:12px;';
+      row.innerHTML = `
+        <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;">
+          <span style="color:var(--muted)">${label}</span>
+          <span style="font-weight:700;color:${hit ? 'var(--green)' : 'var(--text)'}">${total}g ${hit ? '✓' : ''}</span>
+        </div>
+        <div style="background:var(--surface2);border-radius:6px;height:8px;overflow:hidden;">
+          <div style="height:100%;width:${pct}%;background:${hit ? 'var(--green)' : 'var(--accent)'};border-radius:6px;transition:width 0.4s;"></div>
+        </div>
+      `;
+      content.appendChild(row);
+    }
+  }
+
+  // ── Settings save/load ─────────────────────────────────────────
+  const DAY_NAMES = ['Su','Mo','Tu','We','Th','Fr','Sa'];
+
+  function renderSettingsForm() {
+    const s = getSettings();
+    document.getElementById('setProtein').value = s.protein || 150;
+    document.getElementById('setCarbs').value = s.carbs || '';
+    document.getElementById('setFat').value = s.fat || '';
+
+    const ql = s.quickLogs || [];
+    ['q1','q2','q3'].forEach((id, i) => {
+      document.getElementById(id+'name').value = ql[i]?.name || '';
+      document.getElementById(id+'g').value = ql[i]?.g || '';
+    });
+
+    const sel = document.getElementById('daysSelector');
+    sel.innerHTML = '';
+    [0,1,2,3,4,5,6].forEach(dow => {
+      const btn = document.createElement('button');
+      btn.className = 'day-toggle' + ((s.workoutDays||[]).includes(dow) ? ' on' : '');
+      btn.textContent = DAY_NAMES[dow];
+      btn.addEventListener('click', () => btn.classList.toggle('on'));
+      sel.appendChild(btn);
+    });
+  }
+
+  document.getElementById('saveSettings').addEventListener('click', () => {
+    const workoutDays = [...document.querySelectorAll('.day-toggle')]
+      .map((btn, i) => btn.classList.contains('on') ? i : -1)
+      .filter(i => i >= 0);
+
+    const ql = ['q1','q2','q3'].map(id => ({
+      name: document.getElementById(id+'name').value.trim(),
+      g: +document.getElementById(id+'g').value || 0,
+    })).filter(q => q.name && q.g);
+
+    save('settings', {
+      protein: +document.getElementById('setProtein').value || 150,
+      carbs: +document.getElementById('setCarbs').value || 0,
+      fat: +document.getElementById('setFat').value || 0,
+      workoutDays,
+      quickLogs: ql,
+    });
+
+    switchView('today');
+    renderAll();
+  });
+
+  // ── Log protein ────────────────────────────────────────────────
+  document.getElementById('logBtn').addEventListener('click', () => {
+    const name = document.getElementById('customName').value.trim() || 'Food';
+    const p = +document.getElementById('customGrams').value;
+    if (!p) return;
+    const log = getLog();
+    log.push({ name, p });
+    saveLog(log);
+    document.getElementById('customName').value = '';
+    document.getElementById('customGrams').value = '';
+    renderProtein();
+  });
+
+  document.getElementById('customGrams').addEventListener('keydown', e => {
+    if (e.key === 'Enter') document.getElementById('logBtn').click();
+  });
+
+  // ── Navigation ─────────────────────────────────────────────────
+  function switchView(name) {
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.getElementById('view-' + name).classList.add('active');
+    document.querySelector(`[data-view="${name}"]`).classList.add('active');
+    if (name === 'history') renderHistory();
+    if (name === 'settings') renderSettingsForm();
+  }
+
+  document.querySelectorAll('.nav-item').forEach(btn => {
+    btn.addEventListener('click', () => switchView(btn.dataset.view));
+  });
+
+  // ── Header greeting ────────────────────────────────────────────
+  function setGreeting() {
+    const h = new Date().getHours();
+    const g = h < 12 ? 'Good morning 👋' : h < 17 ? 'Good afternoon 👋' : 'Good evening 👋';
+    document.getElementById('greeting').textContent = g;
+    document.getElementById('todayLabel').textContent = new Date().toLocaleDateString('en-GB', {
+      weekday: 'long', day: 'numeric', month: 'long'
+    });
+  }
+
+  // ── Init ───────────────────────────────────────────────────────
+  function renderAll() {
+    renderQuickBtns();
+    renderProtein();
+    renderWorkout();
+  }
+
+  setGreeting();
+  renderAll();
+</script>
+</body>
+</html>
